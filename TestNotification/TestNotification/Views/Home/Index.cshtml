@@ -1,0 +1,172 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+<style>
+    .CIndustryItem {
+        position: relative;
+        display: inline-block;
+        float: left;
+        width: 32%;
+        font-size: 20px;
+        padding: 20px;
+        text-align: center;
+    }
+
+
+    .TestTable {
+        width: 100%;
+    }
+
+    .pagedlist {
+        width: 100%;
+        display: inline-block;
+        list-style-type: none;
+    }
+
+        .pagedlist > .pageditem {
+            padding: 10px;
+            font-size: 20px;
+            display: inline-block;
+        }
+
+            .pagedlist > .pageditem:hover {
+                background-color: rgba(143,143,143,.5);
+                cursor: pointer;
+            }
+
+        .pagedlist > .active {
+            color: orange;
+            text-decoration: underline;
+        }
+
+        .green{
+            color:green;
+        }
+        .red{
+            color:red;
+        }
+</style>
+
+<div class="container " id="IndexPage"></div>
+
+<table class="TestTable2"></table>
+
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/KaTable.js"></script>
+<script>
+    (function ($) {
+
+        $(function () {
+
+
+        ParseNowPageState();
+
+        /*******************依照HASH來判斷顯示哪個頁面***************************/
+        function ParseNowPageState() {
+            var hash = window.location.hash.replace('#', '');
+            var queryArray = hash.split('=');
+            var container = $('#IndexPage');
+            if (queryArray && queryArray[0] === 'CIndustry') {
+
+                LoadListedCompanyByIndustry(container, queryArray[1]);
+            }
+            else {
+                LoadAllIndustry(container);
+
+            }
+
+
+        };
+          /****************************HashChange事件************************************************/
+          $(window).on('hashchange', function () {
+            ParseNowPageState();
+            })
+        });
+
+        /****************************取得所有產業************************************************/
+      function LoadAllIndustry(container) {
+          $.ajax({
+            url: '@Url.Action("GetAllStockCategory")',
+            type: 'POST',
+            contentType:'application/json',
+            success: function (data) {
+                container.empty()
+                if (Array.isArray(data)) {
+
+                    $.each(data, function (index,value) {
+                        var Tag_a = $('<a class="CIndustryItem" >').html(value);
+                        Tag_a.attr('href', '#CIndustry=' + value);
+                        Tag_a.appendTo(container);
+                    });
+                }
+            }
+            });
+      }
+
+      /*****************************透過取得特定產業下之上市公司資料*************************/
+
+
+
+      function LoadListedCompanyByIndustry(container, IndustryName) {
+          container.empty();
+
+          var KaTable = $('<table class="KaTable table">')
+          KaTable.SetTable({
+            sourcelink: '@Url.Action("TestStock")',
+            searchoption: { CIndustry: IndustryName },
+                columnslist:
+                [
+                    { field: 'CID', title: '公司代號', template: '<span class=ggg>#title</span>' },
+                    { field: 'CName', title: '公司名稱' },
+                    { field: 'Bid', title: '買進' },
+                    { field: 'Ask', title: '賣出' },
+                    {
+                        field: 'Change', title: '漲跌', template: function(data)
+                        {
+                            var span = $('<sapn>');
+                            if (parseFloat(data) < 0) {
+                                span.addClass('green')
+                            } else if (parseFloat(data) >0){
+                                span.addClass('red')
+                            }
+                            span.html(data);
+                            return span;
+                        }
+                    },
+
+                ]
+          });
+          KaTable.LoadSource();
+          KaTable.appendTo(container);
+
+      }
+
+    })(jQuery);
+
+
+    @*$(function () {
+        if (!('Notification' in window)) {
+            console.log('This browser does not support notification');
+        } else {
+        }
+
+            //var notifyConfig = {
+            //    body: '\\ ^o^ / 註冊囉', // 設定內容
+            //    icon: '' // 設定 icon
+            //};
+
+
+            //Notification.requestPermission(function (permission) {
+            //    if (permission === 'granted') { // 使用者同意授權
+            //        var notification = new Notification('Hi there!', notifyConfig); // 建立通知
+            //        var notification = new Notification('Hi Here!', notifyConfig);
+            //    }
+            //});
+    });*@
+
+
+</script>
