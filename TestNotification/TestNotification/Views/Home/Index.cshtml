@@ -59,7 +59,8 @@
 
         $(function () {
             $('#btnaaa').on('click', function () {
-
+                window.history.pushState("bb", null, '#CIndustry=水泥工業')
+                ParseNowPageState();
             });
 
         ParseNowPageState();
@@ -67,11 +68,22 @@
         /*******************依照HASH來判斷顯示哪個頁面***************************/
         function ParseNowPageState() {
             var hash = window.location.hash.replace('#', '');
-            var queryArray = hash.split('=');
+            var queryArray = hash.split('&');
             var container = $('#IndexPage');
-            if (queryArray && queryArray[0] === 'CIndustry') {
 
-                LoadListedCompanyByIndustry(container, queryArray[1]);
+            var Param = {};
+            if (queryArray) {
+                $.each(queryArray, function (index, value) {
+                    var paramArray = value.split('=');
+                    if (paramArray.length == 2) {
+                        Param[paramArray[0]] = paramArray[1];
+                    }
+                });
+            };
+
+
+            if (Param.CIndustry) {
+                LoadListedCompanyByIndustry(container, Param);
             }
             else {
                 LoadAllIndustry(container);
@@ -81,9 +93,9 @@
 
         };
           /****************************HashChange事件************************************************/
-          $(window).on('hashchange', function () {
+        $(window).on('hashchange', function () {
             ParseNowPageState();
-            })
+        });
         });
 
         /****************************取得所有產業************************************************/
@@ -110,7 +122,7 @@
 
 
 
-      function LoadListedCompanyByIndustry(container, IndustryName) {
+      function LoadListedCompanyByIndustry(container, Param) {
           container.empty();
 
           var KaTable = $('<table class="KaTable table">')
@@ -138,8 +150,11 @@
                 ],
 
           });
+
+
+
           KaTable.SetPageSize(10);
-          KaTable.Read({ CIndustry: IndustryName }, 1);
+          KaTable.Read(Param, Param.page);
           KaTable.appendTo(container);
 
       }

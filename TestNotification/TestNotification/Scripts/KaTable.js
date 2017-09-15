@@ -53,6 +53,7 @@
         if (!option) {
             return false;
         }
+   
         $.ajax({
             url: option.sourcelink,
             type: 'post',
@@ -106,7 +107,8 @@
 
     function FillTd(table, source) {
         var ths = table.find('th');
-        var tbody = $('<tbody>');
+   
+        tbody = $('<tbody>');
         $.each(source, function (index, value) {
 
             var tr = $('<tr>');
@@ -142,23 +144,26 @@
             var tr = $('<tr>');
             var td = $('<td colspan="10000">');
             var ul = $('<ul class="pagedlist">');
-     
+
+            ul.on('click', 'li:not(.active)', function () {
+                var page = $(this).data('nowpage');
+                if (pageinfo.nowpage !== page) {
+                    pageinfo.nowpage = page;
+                    ReSetPage(table, page);
+                    ExportData(table);
+                }
+
+            });
 
             for (var i = 1; i <= pageinfo.maxpage; i++) {
 
                 var li = $('<li class="pageditem">');
-                if (pageinfo.nowpage === i) {
+                li.html(i).data('nowpage', i);
+
+                if (pageinfo.nowpage == i) {
                     li.addClass('active ')
                 }
-                li.html(i).data('nowpage', i);
-                li.on('click', function () {
-                    var page = $(this).data('nowpage');
-                    if (pageinfo.nowpage !== page) {
-                        pageinfo.nowpage = page;
-                        ReSetPage(table, page);
-                        ExportData(table);
-                    }
-                });
+
                 li.appendTo(ul);
             }
             ul.appendTo(td)
@@ -174,6 +179,7 @@
             if (!pageinfo) {
                 pageinfo = {};
             }
+         
             pageinfo.nowpage = nowpage;
             table.data('pageinfo', pageinfo);
         }
@@ -214,8 +220,11 @@
         var end = (nowpage - 1) * pagesize + pagesize
         var source = table.data('source').slice(start, end)
 
-        table.empty();
-        FillTh(table);
+        if (!table.find('thead').length) {
+            FillTh(table);
+        }
+        table.find('tbody, tfoot').remove();
+
         FillTd(table, source);
         FillFooter(table);
     }
