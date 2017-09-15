@@ -1,7 +1,4 @@
 ﻿
-@{
-    ViewBag.Title = "Index";
-}
 
 <h2>Index</h2>
 <style>
@@ -42,26 +39,28 @@
             text-decoration: underline;
         }
 
-        .green{
-            color:green;
-        }
-        .red{
-            color:red;
-        }
+    .green {
+        color: green;
+    }
+
+    .red {
+        color: red;
+    }
 </style>
 
 <div class="container " id="IndexPage"></div>
 
-<table class="TestTable2"></table>
-
+<button id="btnaaa">aaa</button>
 
 <script src="~/Scripts/jquery-1.10.2.min.js"></script>
-<script src="~/Scripts/KaTable.js"></script>
+<script src="~/Scripts/KaTable.js?Aa"></script>
 <script>
     (function ($) {
 
         $(function () {
+            $('#btnaaa').on('click', function () {
 
+            });
 
         ParseNowPageState();
 
@@ -116,8 +115,7 @@
 
           var KaTable = $('<table class="KaTable table">')
           KaTable.SetTable({
-            sourcelink: '@Url.Action("TestStock")',
-            searchoption: { CIndustry: IndustryName },
+                sourcelink: '@Url.Action("TestStock")',
                 columnslist:
                 [
                     { field: 'CID', title: '公司代號', template: '<span class=ggg>#title</span>' },
@@ -137,10 +135,11 @@
                             return span;
                         }
                     },
+                ],
 
-                ]
           });
-          KaTable.LoadSource();
+          KaTable.SetPageSize(10);
+          KaTable.Read({ CIndustry: IndustryName }, 2);
           KaTable.appendTo(container);
 
       }
