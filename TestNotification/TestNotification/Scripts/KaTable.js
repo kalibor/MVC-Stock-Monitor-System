@@ -169,7 +169,7 @@
     }
 
     function ReSetPage(table, nowpage) {
-        if (nowpage) {
+        if (nowpage && nowpage >=1) {
             var pageinfo = table.data('pageinfo');
             if (!pageinfo) {
                 pageinfo = {};
@@ -190,14 +190,16 @@
         }, obj);
      
         var source = [];
-        if (pageinfo.maxpage === 0) {
 
-           var  SouceCount = table.data('source').length;
-          
 
-           pageinfo.maxpage = Math.floor(SouceCount / pageinfo.pagesize) + 1;
-  
+        var SouceCount = table.data('source').length;
+
+        pageinfo.maxpage = Math.floor(SouceCount / pageinfo.pagesize);
+
+        if (SouceCount % pageinfo.pagesize !=0) {
+            pageinfo.maxpage ++ ;
         }
+        
 
         if (pageinfo.nowpage > pageinfo.maxpage) {
             pageinfo.nowpage = pageinfo.maxpage;
