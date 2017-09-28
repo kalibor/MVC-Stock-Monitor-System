@@ -16,6 +16,8 @@ namespace TestNotification.Models
         public string Bid { get; set; }
         [Display(Name = "漲跌")]
         public string Change { get; set; }
+        [Display(Name = "成交量/張")]
+        public string Volume { get; set; }
     }
 
 }

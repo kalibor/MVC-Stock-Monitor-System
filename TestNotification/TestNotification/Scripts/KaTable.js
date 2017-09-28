@@ -15,7 +15,7 @@
                 }
             }
         },
-        Read(obj, nowpage) {
+        Read(obj, nowpage,func) {
             var table = $(this);
             if (table.hasClass('KaTable')) {
 
@@ -26,10 +26,32 @@
                 }
 
                 ReSetPage(table, nowpage);
-                LoadSource(table);
+                AjaxLoadSource(table, func);
+           
             }
         },
-
+        Sort: function (columnname, desc) {
+            var table = $(this);
+            if (!columnname){
+                AjaxLoadSource(table);
+            }
+            else {
+                var source = table.data('source');
+               
+                if ($.isArray(source)) {
+                    var data = source.sort(function (a, b) {
+                        if (desc) {
+                            return b[columnname] - a[columnname];
+                        } else {
+                            return a[columnname] - b[columnname];
+                        }
+                            
+                    });
+                   table.data('source', data);
+                   ExportData(table);
+                }
+            }
+        },
         SetPageSize: function (pagesize) {
             var table = $(this);
             if (table.hasClass('KaTable')) {
@@ -48,27 +70,29 @@
     });
 
 
-    function LoadSource(table) {
+    function AjaxLoadSource(table,func) {
         var option = table.data('option');
         if (!option) {
             return false;
         }
-   
-        $.ajax({
-            url: option.sourcelink,
-            type: 'post',
-            data: JSON.stringify(option.searchoption),
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function (data) {
-                if (Array.isArray(data)) {
-                    table.data('source', data);
-                    ExportData(table);
-
+            $.ajax({
+                url: option.sourcelink,
+                type: 'post',
+                data: JSON.stringify(option.searchoption),
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function (data) {
+                    if (Array.isArray(data)) {
+                        table.data('source', data);
+                        ExportData(table);
+                        if ($.isFunction(func)) {
+                            func();
+                        }
+                    }
                 }
-            }
-
-        });
+            });
+    
+   
 
     }
 
@@ -91,9 +115,14 @@
 
                     th.data('template', value.template)
                 }
+
+                if (value.sort) {
+                    th.on('click', function () {
+                        table.Sort(value.field);
+                    })
+                }
+
                 th.html(value.title)
-
-
                 th.appendTo(tr)
             });
             tr.appendTo(thead);
@@ -105,11 +134,11 @@
 
 
 
-    function FillTd(table, source) {
+    function FillTd(table, pagedsource) {
         var ths = table.find('th');
    
         tbody = $('<tbody>');
-        $.each(source, function (index, value) {
+        $.each(pagedsource, function (index, value) {
 
             var tr = $('<tr>');
             ths.each(function () {
@@ -218,14 +247,14 @@
      
         var start = (nowpage - 1) * pagesize;
         var end = (nowpage - 1) * pagesize + pagesize
-        var source = table.data('source').slice(start, end)
+        var _PagedSource = table.data('source').slice(start, end)
 
         if (!table.find('thead').length) {
             FillTh(table);
         }
         table.find('tbody, tfoot').remove();
 
-        FillTd(table, source);
+        FillTd(table, _PagedSource);
         FillFooter(table);
     }
 

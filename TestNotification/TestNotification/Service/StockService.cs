@@ -44,12 +44,14 @@ namespace TestNotification.Service
                                 Bid = s.Bid,
                                 Ask = s.Ask,
                                 Change = s.Change,
+                                Volume= s.Volume
+
                             } as object;
 
             return new StockInfoTable()
             {
                 Date = DateTime.Now,
-                TableColumn = new List<string>() { "公司代號", "公司名稱", "買進", "賣出", "漲跌" },
+          ///*  TableColumn = new List<string>() { "公司代號", "公司名稱", "買進", "賣出", "漲跌" }*/,
                 TableData = TableData.ToList()
             };
 
@@ -104,7 +106,7 @@ namespace TestNotification.Service
             var strCode = string.Join("+", CodesList);
 
             /*yahoo finance API f参数对照表 http://www.nginx.cn/1414.html*/
-            var url = string.Format("http://finance.yahoo.com/d/quotes.csv?s={0}&f={1}", strCode, "sbac1");
+            var url = string.Format("http://finance.yahoo.com/d/quotes.csv?s={0}&f={1}", strCode, "sbac1v");
             List<StockInfo> StockList = new List<StockInfo>();
 
             HttpClient client = new HttpClient();
@@ -118,7 +120,7 @@ namespace TestNotification.Service
                     {
                         string result = reader.ReadLine();
                         string[] results = result.Split(',');
-                        if (results.Length == 4)
+                        if (results.Length == 5)
                         {
                             StockInfo stock = new StockInfo()
                             {
@@ -126,6 +128,7 @@ namespace TestNotification.Service
                                 Bid = results[1].Replace("\"", ""),
                                 Ask = results[2].Replace("\"", ""),
                                 Change = results[3].Replace("\"", ""),
+                                Volume = string.Format("{0:0,0}", int.Parse(results[4].Replace("\"", "")) /1000),
                             };
                             StockList.Add(stock);
                         }

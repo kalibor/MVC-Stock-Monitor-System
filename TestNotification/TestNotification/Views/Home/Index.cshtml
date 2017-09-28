@@ -53,15 +53,15 @@
 <button id="btnaaa">aaa</button>
 
 <script src="~/Scripts/jquery-1.10.2.min.js"></script>
-<script src="~/Scripts/KaTable.js?Aa"></script>
+<script src="~/Scripts/KaTable.js?Aas"></script>
 <script>
     (function ($) {
 
         $(function () {
-            $('#btnaaa').on('click', function () {
-                window.history.pushState("bb", null, '#CIndustry=水泥工業')
-                ParseNowPageState();
-            });
+            //$('#btnaaa').on('click', function () {
+            //    window.history.pushState("bb", null, '#CIndustry=水泥工業')
+            //    ParseNowPageState();
+            //});
 
         ParseNowPageState();
 
@@ -121,41 +121,51 @@
       /*****************************透過取得特定產業下之上市公司資料*************************/
 
 
-
       function LoadListedCompanyByIndustry(container, Param) {
           container.empty();
 
+
+
           var KaTable = $('<table class="KaTable table">')
           KaTable.SetTable({
-                sourcelink: '@Url.Action("TestStock")',
-                columnslist:
-                [
-                    { field: 'CID', title: '公司代號', template: '<span class=ggg>#title</span>' },
-                    { field: 'CName', title: '公司名稱' },
-                    { field: 'Bid', title: '買進' },
-                    { field: 'Ask', title: '賣出' },
-                    {
-                        field: 'Change', title: '漲跌', template: function(data)
-                        {
-                            var span = $('<sapn>');
-                            if (parseFloat(data) < 0) {
-                                span.addClass('green')
-                            } else if (parseFloat(data) >0){
-                                span.addClass('red')
-                            }
-                            span.html(data);
-                            return span;
-                        }
-                    },
-                ],
+              sourcelink: '@Url.Action("TestStock")',
+              columnslist:
+              [
+                  { field: 'CID', title: '公司代號', template: '<span class=ggg>#title</span>' },
+                  { field: 'CName', title: '公司名稱' },
+                  { field: 'Bid', title: '買進', sort : true },
+                  { field: 'Ask', title: '賣出', sort: true  },
+                  {
+                      field: 'Change', title: '漲跌', sort: true , template: function (data) {
+                          var span = $('<sapn>');
+                          if (parseFloat(data) < 0) {
+                              span.addClass('green')
+                          } else if (parseFloat(data) > 0) {
+                              span.addClass('red')
+                          }
+                          span.html(data);
+                          return span;
+                      }
+                  },
+                  { field: 'Volume', title: '成交量/張', sort: true  },
+              ],
 
           });
 
 
 
           KaTable.SetPageSize(10);
-          KaTable.Read(Param, Param.page);
+          KaTable.Read(Param, Param.page, function (source) {
+              console.log(source)
+          });
+
+          $('#btnaaa').on('click', function () {
+              KaTable.Sort('Bid');
+            });
+
+          KaTable.Sort('Bid');
           KaTable.appendTo(container);
+
 
       }
 
